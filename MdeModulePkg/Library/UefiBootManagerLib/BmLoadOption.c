@@ -369,6 +369,9 @@ EfiBootManagerAddLoadOptionVariable (
   IN     UINTN                         Position
   )
 {
+
+  DEBUG((DEBUG_INFO,"Register EfiBootManagerAddLoadOptionVariable %s\n",Option->Description));
+
   EFI_STATUS  Status;
   UINT16      OptionNumber;
 

@@ -224,6 +224,8 @@ PlatformRegisterFvBootOption (
                   );
   ASSERT_EFI_ERROR (Status);
 
+  DEBUG((DEBUG_INFO,"PlatformRegisterFvBootOption %s enabled %d\n",Description,Enabled));
+
   EfiInitializeFwVolDevicepathNode (&FileNode, FileGuid);
   DevicePath = DevicePathFromHandle (LoadedImage->DeviceHandle);
   ASSERT (DevicePath != NULL);
@@ -267,6 +269,7 @@ PlatformRegisterFvBootOption (
                   );
 
   if ((OptionIndex == -1) && Enabled) {
+    DEBUG((DEBUG_INFO,"Aggiungo %s\n",Description));
     Status = EfiBootManagerAddLoadOptionVariable (&NewOption, MAX_UINTN);
     ASSERT_EFI_ERROR (Status);
   } else if ((OptionIndex != -1) && !Enabled) {
@@ -274,8 +277,11 @@ PlatformRegisterFvBootOption (
                BootOptions[OptionIndex].OptionNumber,
                LoadOptionTypeBoot
                );
+    DEBUG((DEBUG_INFO,"Trovato, ed elimino %s %r\n",BootOptions[OptionIndex].Description,Status));
+
     ASSERT_EFI_ERROR (Status);
   } else if ((OptionIndex != -1) && Enabled && BootOptions[OptionIndex].Attributes != NewOption.Attributes) { //Option Found and enabled but with different Attributes!
+    DEBUG((DEBUG_INFO,"Trovato con attributi diversi %s\n",Description));
     Status = EfiBootManagerDeleteLoadOptionVariable (
               BootOptions[OptionIndex].OptionNumber,
               LoadOptionTypeBoot

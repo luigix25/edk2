@@ -192,6 +192,8 @@ PlatformRegisterFvBootOption (
                   );
   ASSERT_EFI_ERROR (Status);
 
+  DEBUG((DEBUG_INFO,"PlatformRegisterFvBootOption %s enabled %d\n",Description,Enabled));
+
   EfiInitializeFwVolDevicepathNode (&FileNode, FileGuid);
   DevicePath = DevicePathFromHandle (LoadedImage->DeviceHandle);
   ASSERT (DevicePath != NULL);

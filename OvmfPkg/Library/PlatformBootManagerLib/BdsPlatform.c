@@ -2025,6 +2025,13 @@ PlatformBootManagerAfterConsole (
     FirmwareSetupEnabled
     );
 
+  PlatformRegisterFvBootOption (
+    &gResetAppFileGuid,
+    L"Reset",
+    LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_APP,
+    !FirmwareSetupEnabled
+    );
+
   RemoveStaleFvFileOptions ();
   SetBootOrderFromQemu ();
 

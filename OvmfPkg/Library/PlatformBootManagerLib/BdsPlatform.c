@@ -27,6 +27,8 @@ VOID       *mEmuVariableEventReg;
 EFI_EVENT  mEmuVariableEvent;
 UINT16     mHostBridgeDevId;
 
+BOOLEAN    FirmwareSetupEnabled;
+
 //
 // Table of host IRQs matching PCI IRQs A-D
 // (for configuring PCI Interrupt Line register)
@@ -633,6 +635,18 @@ PlatformBootManagerBeforeConsole (
     FrontPageTimeout,
     Status
     ));
+
+  Status = QemuFwCfgParseBool (
+                "opt/org.tianocore/FirmwareSetupSupport",
+                &FirmwareSetupEnabled
+                );
+
+  if (RETURN_ERROR (Status)) {
+    FirmwareSetupEnabled = TRUE;
+  }
+
+  //Remove UiApp if already there
+  RemoveUiApp();
 
   if (!FeaturePcdGet (PcdBootRestrictToFirmware)) {
     PlatformRegisterOptionsAndKeys ();
@@ -1913,6 +1927,7 @@ PlatformBootManagerAfterConsole (
   )
 {
   EFI_BOOT_MODE  BootMode;
+  BOOLEAN        ShellEnabled;
 
   DEBUG ((DEBUG_INFO, "PlatformBootManagerAfterConsole\n"));
 
@@ -1972,7 +1987,6 @@ PlatformBootManagerAfterConsole (
     EfiBootManagerRefreshAllBootOption ();
   }
 
-  BOOLEAN        ShellEnabled;
   RETURN_STATUS  RetStatus;
 
   RetStatus = QemuFwCfgParseBool (
@@ -2007,7 +2021,8 @@ PlatformBootManagerAfterConsole (
   PlatformRegisterFvBootOption (
     &gUiAppFileGuid,
     L"EFI Firmware Setup",
-    LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_APP
+    LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_APP,
+    FirmwareSetupEnabled
     );
 
   RemoveStaleFvFileOptions ();

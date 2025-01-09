@@ -89,3 +89,4 @@
   gUefiShellFileGuid
   gGrubFileGuid
   gUiAppFileGuid
+  gResetAppFileGuid

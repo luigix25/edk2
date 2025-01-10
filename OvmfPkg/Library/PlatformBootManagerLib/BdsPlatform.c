@@ -451,6 +451,63 @@ SaveS3BootScript (
   VOID
   );
 
+/**
+  Check if it's a Device Path pointing to UiApp.
+
+  @param  DevicePath     Input device path.
+
+  @retval TRUE   The device path is UiApp File Device Path.
+  @retval FALSE  The device path is NOT UiApp File Device Path.
+**/
+BOOLEAN
+BmIsUiAppFilePath (
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  EFI_HANDLE  FvHandle;
+  VOID        *NameGuid;
+  EFI_STATUS  Status;
+
+  Status = gBS->LocateDevicePath (&gEfiFirmwareVolume2ProtocolGuid, &DevicePath, &FvHandle);
+  if (!EFI_ERROR (Status)) {
+    NameGuid = EfiGetNameGuidFromFwVolDevicePathNode ((CONST MEDIA_FW_VOL_FILEPATH_DEVICE_PATH *)DevicePath);
+    if (NameGuid != NULL) {
+      return CompareGuid (NameGuid, PcdGetPtr (PcdFirmwareConfigFile));
+    }
+  }
+
+  return FALSE;
+}
+
+//This function deletes stale UiApp entries that are not used by bootmanagermenu
+VOID
+RemoveUiApp (
+  VOID
+  )
+{
+  EFI_BOOT_MANAGER_LOAD_OPTION  *BootOptions;
+  UINTN                         BootOptionCount;
+  UINTN                         Index;
+  BootOptions = EfiBootManagerGetLoadOptions (
+                  &BootOptionCount,
+                  LoadOptionTypeBoot
+                  );
+  for (Index = 0; Index < BootOptionCount; ++Index) {
+    if (BmIsUiAppFilePath (BootOptions[Index].FilePath) && BootOptions[Index].Attributes == (LOAD_OPTION_CATEGORY_APP | LOAD_OPTION_ACTIVE | LOAD_OPTION_HIDDEN)) {
+      //
+      // Delete the boot option.
+      //
+      DEBUG((DEBUG_INFO,"Tolgo UiApp!! %s %d\n",BootOptions[Index].Description,BootOptions[Index].Attributes));
+      EfiBootManagerDeleteLoadOptionVariable (
+        BootOptions[Index].OptionNumber,
+        LoadOptionTypeBoot
+        );
+    }
+  }
+  EfiBootManagerFreeLoadOptions (BootOptions, BootOptionCount);
+}
+
+
 //
 // BDS Platform Functions
 //

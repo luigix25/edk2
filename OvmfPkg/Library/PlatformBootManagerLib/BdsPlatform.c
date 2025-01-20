@@ -1992,6 +1992,22 @@ PlatformBootManagerAfterConsole (
     ShellEnabled = TRUE;
   }
 
+
+    DEBUG((DEBUG_INFO,"PRIMA DI ELIMINARE\n"));
+    UINTN LoadOptionCount;
+    EFI_BOOT_MANAGER_LOAD_OPTION *LoadOptions = EfiBootManagerGetLoadOptions (&LoadOptionCount, LoadOptionTypeBoot);
+    for (INTN Index = 0; Index < LoadOptionCount; Index++) {
+      DEBUG ((
+        DEBUG_INFO,
+        "    %04x: %s \t\t 0x%04x\n",
+        LoadOptions[Index].OptionNumber,
+        LoadOptions[Index].Description,
+        LoadOptions[Index].Attributes
+        ));
+    }
+
+    EfiBootManagerFreeLoadOptions (LoadOptions, LoadOptionCount);
+
   //
   // Register UEFI Shell
   //

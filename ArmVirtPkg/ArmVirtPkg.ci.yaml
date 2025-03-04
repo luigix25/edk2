@@ -85,7 +85,7 @@
         "IgnoreGuidName": [],
         "IgnoreGuidValue": [],
         "IgnoreFoldersAndFiles": [],
-        "IgnoreDuplicates": [],
+        "IgnoreDuplicates": ["gUiAppFileGuid=UiApp"],
     },
 
     ## options defined .pytool/Plugin/LibraryClassCheck

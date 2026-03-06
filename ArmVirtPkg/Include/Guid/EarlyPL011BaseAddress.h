@@ -26,4 +26,5 @@ typedef struct {
   // for DebugLib; may equal ConsoleAddress if there's only one PL011 UART
   //
   UINT64    DebugAddress;
+  UINT32    DebugLevel;
 } EARLY_PL011_BASE_ADDRESS;

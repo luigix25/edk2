@@ -104,11 +104,12 @@ FdtSerialGetPorts (
   }
 
   Ports->NumberOfPorts = 0;
+  Ports->DebugLevel    = -1;
   Node                 = FdtNextNode (DeviceTree, 0, NULL);
   while ((Node > 0) &&
          (Ports->NumberOfPorts < ARRAY_SIZE (Ports->BaseAddress)))
   {
-    CONST CHAR8  *CompatProp;
+    CONST CHAR8  *CompatProp, *DebugLevel;
     INT32        PropSize;
 
     CompatProp = FdtGetProp (DeviceTree, Node, "compatible", &PropSize);
@@ -131,6 +132,19 @@ FdtSerialGetPorts (
           Ports->BaseAddress[Ports->NumberOfPorts++] = BaseAddress;
         }
       }
+    }
+
+    DebugLevel = FdtGetProp (DeviceTree, Node, "edk2,debug-level", NULL);
+    if (DebugLevel != NULL) {
+      RETURN_STATUS  Status;
+      UINTN          value;
+
+      Status = AsciiStrHexToUintnS (DebugLevel, NULL, &value);
+      if (RETURN_ERROR (Status)) {
+        return RETURN_INVALID_PARAMETER;
+      }
+
+      Ports->DebugLevel = value;
     }
 
     Node = FdtNextNode (DeviceTree, Node, NULL);

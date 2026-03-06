@@ -94,17 +94,25 @@ DebugPrintMarker (
   IN  BASE_LIST    BaseListMarker
   )
 {
-  CHAR8  Buffer[MAX_DEBUG_MESSAGE_LENGTH];
+  CHAR8   Buffer[MAX_DEBUG_MESSAGE_LENGTH];
+  UINT32  SerialDebugLevel, DebugLevel;
 
   //
   // If Format is NULL, then ASSERT().
   //
   ASSERT (Format != NULL);
 
+  DebugLevel = GetDebugPrintErrorLevel ();
+
+  SerialDebugLevel = GetDebugLogRuntime ();
+  if (SerialDebugLevel == -1) {
+    SerialDebugLevel = DebugLevel;
+  }
+
   //
   // Check driver debug mask value and global mask
   //
-  if ((ErrorLevel & GetDebugPrintErrorLevel ()) == 0) {
+  if ((ErrorLevel & DebugLevel) == 0) {
     return;
   }
 
@@ -122,6 +130,13 @@ DebugPrintMarker (
   //
   if (MemDebugLogEnabled ()) {
     MemDebugLogWrite ((CHAR8 *)Buffer, AsciiStrLen (Buffer));
+  }
+
+  //
+  // Check runtime debug mask value and global mask
+  //
+  if ((ErrorLevel & SerialDebugLevel) == 0) {
+    return;
   }
 
   //

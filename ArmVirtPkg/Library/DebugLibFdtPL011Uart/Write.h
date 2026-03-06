@@ -34,3 +34,7 @@ DebugLibFdtPL011UartWrite (
   IN UINT8  *Buffer,
   IN UINTN  NumberOfBytes
   );
+
+UINT32
+GetDebugLogRuntime (
+  );

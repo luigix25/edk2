@@ -13,6 +13,7 @@
 typedef struct {
   UINTN     NumberOfPorts;
   UINT64    BaseAddress[2];
+  UINT32    DebugLevel;
 } FDT_SERIAL_PORTS;
 
 /**

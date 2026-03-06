@@ -77,6 +77,8 @@ PlatformPeim (
 
   Status = FdtSerialGetPorts (Base, "arm,pl011", &Ports);
   if (!EFI_ERROR (Status)) {
+    UartHobData->DebugLevel = Ports.DebugLevel;
+
     if (Ports.NumberOfPorts == 1) {
       //
       // Just one UART; direct both SerialPortLib+console and DebugLib to it.

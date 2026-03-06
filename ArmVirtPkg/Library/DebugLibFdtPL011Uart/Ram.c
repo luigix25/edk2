@@ -21,6 +21,8 @@
 UINTN          mDebugLibFdtPL011UartAddress;
 RETURN_STATUS  mDebugLibFdtPL011UartPermanentStatus = RETURN_SUCCESS;
 
+UINT32  mRuntimeDebugLevel = -1;
+
 /**
   Statefully initialize both the library instance and the debug PL011 UART.
 **/
@@ -61,6 +63,8 @@ Initialize (
     Status = RETURN_NOT_FOUND;
     goto Failed;
   }
+
+  mRuntimeDebugLevel = UartBase->DebugLevel;
 
   BaudRate         = (UINTN)PcdGet64 (PcdUartDefaultBaudRate);
   ReceiveFifoDepth = 0; // Use the default value for Fifo depth
@@ -121,4 +125,11 @@ DebugLibFdtPL011UartWrite (
   }
 
   return PL011UartWrite (mDebugLibFdtPL011UartAddress, Buffer, NumberOfBytes);
+}
+
+UINT32
+GetDebugLogRuntime (
+  )
+{
+  return mRuntimeDebugLevel;
 }

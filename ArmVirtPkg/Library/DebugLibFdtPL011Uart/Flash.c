@@ -105,3 +105,24 @@ DebugLibFdtPL011UartWrite (
 
   return PL011UartWrite ((UINTN)DebugAddress, Buffer, NumberOfBytes);
 }
+
+UINT32
+GetDebugLogRuntime (
+  )
+{
+  CONST VOID        *DeviceTree;
+  FDT_SERIAL_PORTS  Ports;
+  RETURN_STATUS     Status;
+
+  DeviceTree = (VOID *)(UINTN)PcdGet64 (PcdDeviceTreeInitialBaseAddress);
+  if (DeviceTree == NULL) {
+    return -1;
+  }
+
+  Status = FdtSerialGetPorts (DeviceTree, "arm,pl011", &Ports);
+  if (RETURN_ERROR (Status)) {
+    return -1;
+  }
+
+  return Ports.DebugLevel;
+}

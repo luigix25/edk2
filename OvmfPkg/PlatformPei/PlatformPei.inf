@@ -55,6 +55,7 @@
   BaseLib
   CacheMaintenanceLib
   DebugLib
+  FdtLib
   HobLib
   IoLib
   PciLib

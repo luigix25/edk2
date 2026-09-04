@@ -19,6 +19,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/FdtLib.h>
 #include <Library/HobLib.h>
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -113,12 +114,33 @@ MicrovmInitialization (
   EFI_STATUS            Status;
   UINT64                *FdtHobData;
   VOID                  *NewBase;
+  VOID                  *IgvmFdt;
+  UINTN                 IgvmFdtMax;
 
-  Status = QemuFwCfgFindFile ("etc/fdt", &FdtItem, &FdtSize);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "%a: no etc/fdt found in fw_cfg, using dummy\n", __func__));
+  //
+  // A device tree supplied via the IGVM_VHT_DEVICE_TREE parameter takes
+  // precedence over the fw_cfg etc/fdt file.  Validate the header and make
+  // sure the blob fits within the IGVM parameter area before using it.
+  //
+  IgvmFdt = PlatformIgvmDeviceTree (&IgvmFdtMax);
+  if ((IgvmFdt != NULL) &&
+      (FdtCheckHeader (IgvmFdt) == 0) &&
+      (FdtTotalSize (IgvmFdt) <= IgvmFdtMax))
+  {
+    DEBUG((DEBUG_INFO,"leggo fdt da Dt\n"));
+
     FdtItem = 0;
-    FdtSize = sizeof (EmptyFdt);
+    FdtSize = FdtTotalSize (IgvmFdt);
+  } else {
+    IgvmFdt = NULL;
+    DEBUG((DEBUG_INFO,"leggo fdt da fw_cfg\n"));
+
+    Status = QemuFwCfgFindFile ("etc/fdt", &FdtItem, &FdtSize);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "%a: no etc/fdt found in fw_cfg, using dummy\n", __func__));
+      FdtItem = 0;
+      FdtSize = sizeof (EmptyFdt);
+    }
   }
 
   FdtPages = EFI_SIZE_TO_PAGES (FdtSize);
@@ -128,7 +150,10 @@ MicrovmInitialization (
     return;
   }
 
-  if (FdtItem) {
+  if (IgvmFdt != NULL) {
+    DEBUG ((DEBUG_INFO, "%a: using igvm device tree\n", __func__));
+    CopyMem (NewBase, IgvmFdt, FdtSize);
+  } else if (FdtItem) {
     QemuFwCfgSelectItem (FdtItem);
     QemuFwCfgReadBytes (FdtSize, NewBase);
   } else {

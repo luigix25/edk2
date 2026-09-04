@@ -320,6 +320,26 @@ PlatformIgvmVpCount (
   VOID
   );
 
+/**
+  Locate the device tree supplied via the IGVM_VHT_DEVICE_TREE parameter.
+
+  The returned pointer refers to the raw device tree blob inside the IGVM
+  parameter area.  The caller must validate the device tree header (e.g. with
+  FdtCheckHeader ()) and ensure the total size does not exceed MaxSize before
+  using it.
+
+  @param[out]  MaxSize  If not NULL, receives the maximum number of bytes
+                        available for the device tree in the parameter area.
+
+  @retval NULL   No IGVM parameter area is present.
+  @retval other  Pointer to the device tree blob in the IGVM parameter area.
+**/
+VOID *
+EFIAPI
+PlatformIgvmDeviceTree (
+  OUT UINTN  *MaxSize   OPTIONAL
+  );
+
 VOID
 EFIAPI
 PlatformIgvmParamReserve (

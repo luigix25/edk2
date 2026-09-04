@@ -24,6 +24,8 @@
 #define VP_COUNT_OFFSET  (MEMORY_MAP_OFFSET + MEMORY_MAP_SIZE)
 #define VP_COUNT_SIZE    16
 
+#define DEVICE_TREE_OFFSET  (VP_COUNT_OFFSET + VP_COUNT_SIZE)
+
 #define IGVM_MM_ENTRY_TYPE_MEMORY      0x00
 #define IGVM_MM_ENTRY_TYPE_RESERVED    0x01
 #define IGVM_MM_ENTRY_TYPE_PERSISTENT  0x02
@@ -68,6 +70,8 @@ PlatformIgvmMemoryMapFind (
       (Map[0].Reserved != 0))
   {
     DEBUG ((DEBUG_INFO, "%a: memory map sanity check failed, ignoring\n", __func__));
+    DEBUG ((DEBUG_INFO, "EntryType = %x Reserved %d\n",Map[0].EntryType,Map[0].Reserved));
+
     mIgvmParamsInvalid = TRUE;
     return NULL;
   }
@@ -223,6 +227,39 @@ PlatformIgvmDataHobs (
       EfiBootServicesData
       );
   }
+}
+
+VOID *
+EFIAPI
+PlatformIgvmDeviceTree (
+  OUT UINTN  *MaxSize   OPTIONAL
+  )
+{
+  UINT64  Address;
+
+  if (mIgvmParamsInvalid) {
+    DEBUG((DEBUG_INFO,"Luigi: invalido\n"));
+    return NULL;
+  }
+
+  Address = FixedPcdGet64 (PcdOvmfIgvmParamBase);
+  if (Address == 0) {
+      DEBUG((DEBUG_INFO,"Luigi: no param area\n"));
+
+    // no parameter area
+    return NULL;
+  }
+
+  if (MaxSize != NULL) {
+    //
+    // The device tree occupies the parameter area from DEVICE_TREE_OFFSET to
+    // the end.  The caller is responsible for validating the device tree
+    // header and making sure it fits within this bound.
+    //
+    *MaxSize = (UINTN)(FixedPcdGet64 (PcdOvmfIgvmParamSize) - DEVICE_TREE_OFFSET);
+  }
+
+  return (VOID *)(UINTN)(Address + DEVICE_TREE_OFFSET);
 }
 
 UINT32

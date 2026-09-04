@@ -13,6 +13,7 @@ ALIGN 16
 %define IGVM_ID_PARAM_AREA                               0x100
 %define IGVM_ID_PARAM_MEMORY_MAP                         0x101
 %define IGVM_ID_PARAM_VP_COUNT                           0x102
+%define IGVM_ID_PARAM_DEVICE_TREE                        0x103
 
 %define IGVM_ID_HOB_AREA                                 0x200
 
@@ -23,6 +24,11 @@ ALIGN 16
 
 %define VP_COUNT_OFFSET  (MEMORY_MAP_OFFSET + MEMORY_MAP_SIZE)
 %define VP_COUNT_SIZE                                       16
+
+; The device tree (IGVM_VHT_DEVICE_TREE parameter) occupies the remainder of
+; the parameter area, right after the vp-count.
+%define DEVICE_TREE_OFFSET  (VP_COUNT_OFFSET + VP_COUNT_SIZE)
+%define DEVICE_TREE_SIZE    (IGVM_PARAM_SIZE - DEVICE_TREE_OFFSET)
 
 IgvmParamStart:
 _IgvmDescriptor:
@@ -47,6 +53,11 @@ _IgvmVpCount:
   DD  VP_COUNT_OFFSET
   DD  VP_COUNT_SIZE
   DD  IGVM_ID_PARAM_VP_COUNT
+
+_IgvmDeviceTree:
+  DD  DEVICE_TREE_OFFSET
+  DD  DEVICE_TREE_SIZE
+  DD  IGVM_ID_PARAM_DEVICE_TREE
 
 %endif
 
